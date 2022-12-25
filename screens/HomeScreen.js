@@ -1,6 +1,7 @@
 import { signOut } from 'firebase/auth';
 import { auth } from '../config';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { AuthenticatedUserContext } from '../providers';
 import {
   StyleSheet,
   View,
@@ -26,6 +27,7 @@ export const HomeScreen = () => {
   const [presentTodo, setPresentTodo] = useState('');
   const todosKeys = Object.keys(todos);
   const database = getDatabase();
+  const { user } = useContext(AuthenticatedUserContext);
 
   const handleLogout = () => {
     signOut(auth).catch(error => console.log('Error logging out: ', error));
@@ -37,7 +39,6 @@ export const HomeScreen = () => {
       let todoItems = { ...data };
       setTodos(todoItems);
     });
-
   }, []);
 
   function addNewTodo() {
@@ -50,11 +51,6 @@ export const HomeScreen = () => {
 
   function clearTodos() {
     remove(ref(database, '/todos'));
-  }
-
-  const user = auth.currentUser;
-  if (user !== null) {
-    console.log(user.providerData[0].email);
   }
 
   return (
@@ -114,7 +110,6 @@ const ToDoItem = ({ todoItem: { title, done }, id }) => {
   const database = getDatabase();
 
   const onCheck = () => {
-    console.log(doneState);
     setDone(!doneState);
     update(ref(database, '/todos'), {
       [id]: {
@@ -163,20 +158,3 @@ const styles = StyleSheet.create({
     fontSize: 16
   },
 });
-
-// export const HomeScreen = () => {
-//   const handleLogout = () => {
-//     signOut(auth).catch(error => console.log('Error logging out: ', error));
-//   };
-//   return (
-//     <View style={styles.container}>
-//       <Button title='Sign Out' onPress={handleLogout} />
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1
-//   }
-// });

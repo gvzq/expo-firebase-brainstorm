@@ -1,9 +1,19 @@
 # expo-firebase-starter 🔥
-
 ![Supports Expo iOS](https://img.shields.io/badge/iOS-4630EB.svg?style=flat-square&logo=APPLE&labelColor=999999&logoColor=fff)
 ![Supports Expo Android](https://img.shields.io/badge/Android-4630EB.svg?style=flat-square&logo=ANDROID&labelColor=A4C639&logoColor=fff)
 [![runs with Expo Go](https://img.shields.io/badge/Runs%20with%20Expo%20Go-4630EB.svg?style=flat-square&logo=EXPO&labelColor=f3f3f3&logoColor=000)](https://expo.dev/client)
 
+## Development To-do
+Features in development
+- [x] Firebase Login
+- [x] Botton Tap
+- [ ] [Sharing](https://docs.expo.dev/versions/v47.0.0/sdk/sharing/)  
+
+Resources
+- [Modules for Expo](https://reactnative.directory/)
+- [Icons](https://icons.expo.fyi/)
+
+## Description
 Is a quicker way to start with Expo + Firebase (using JS SDK) projects. It includes:
 
 - based on Expo SDK `46`
