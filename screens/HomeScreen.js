@@ -1,160 +1,67 @@
-import { signOut } from 'firebase/auth';
-import { auth } from '../config';
-import React, { useState, useEffect, useContext } from 'react';
-import { AuthenticatedUserContext } from '../providers';
+
+import React from 'react';
 import {
   StyleSheet,
   View,
-  ScrollView
+  ScrollView,
+  Dimensions
 } from 'react-native';
 import {
   Text,
-  Checkbox,
-  TextInput,
-  Button
+  Button,
+  Card,
+  Title, Paragraph
 } from 'react-native-paper';
-import {
-  ref,
-  onValue,
-  push,
-  update,
-  remove,
-  getDatabase
-} from 'firebase/database';
+import { Ionicons } from '@expo/vector-icons';
+let ScreenHeight = Dimensions.get("window").height;
 
-export const HomeScreen = () => {
-  const [todos, setTodos] = useState({});
-  const [presentTodo, setPresentTodo] = useState('');
-  const todosKeys = Object.keys(todos);
-  const database = getDatabase();
-  const { user } = useContext(AuthenticatedUserContext);
+export const HomeScreen = ({ navigation }) => {
 
-  const handleLogout = () => {
-    signOut(auth).catch(error => console.log('Error logging out: ', error));
-  };
 
-  useEffect(() => {
-    return onValue(ref(database, '/todos'), querySnapShot => {
-      let data = querySnapShot.val() || {};
-      let todoItems = { ...data };
-      setTodos(todoItems);
-    });
-  }, []);
-
-  function addNewTodo() {
-    push(ref(database, '/todos'), {
-      done: false,
-      title: presentTodo,
-    });
-    setPresentTodo('');
-  }
-
-  function clearTodos() {
-    remove(ref(database, '/todos'));
-  }
 
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={styles.contentContainerStyle}>
+      contentContainerStyle={styles.contentContainerStyle}
+    >
       <View style={styles.container}>
-        <Button mode="outlined" onPress={handleLogout} >
-          Sign Out
-        </Button>
-      </View>
-      <View>
-        {todosKeys.length > 0 ? (
-          todosKeys.map(key => (
-            <ToDoItem
-              key={key}
-              id={key}
-              todoItem={todos[key]}
-            />
-          ))
-        ) : (
-          <Text>No todo item</Text>
-        )}
-      </View>
 
-      <TextInput
-        placeholder="New todo"
-        value={presentTodo}
-        style={styles.textInput}
-        onChangeText={text => {
-          setPresentTodo(text);
-        }}
-        onSubmitEditing={addNewTodo}
-      />
+        <Card
+          onPress={() => { navigation.navigate('Create') }}
+          style={styles.card}
+        >
+          <Card.Content>
+            <Title>Create a Room</Title>
+            <Paragraph>Card content</Paragraph>
+            <Ionicons name="add-circle-outline" size={50} />
+          </Card.Content>
+        </Card>
 
-      <View>
-        <View style={{ marginTop: 20 }}>
-          <Button mode="outlined"
-            onPress={addNewTodo}
-            disabled={presentTodo == ''}>
-            Add new todo
-          </Button>
-        </View>
-
-        <View style={{ marginTop: 20 }}>
-          <Button mode="outlined" onPress={clearTodos}>
-            Clear the todo list
-          </Button>
-        </View>
+        <Card
+          onPress={() => { navigation.navigate('Join') }}
+          style={styles.card}
+        >
+          <Card.Content>
+            <Title>Join a Room</Title>
+            <Paragraph>Card content</Paragraph>
+            <Ionicons name="enter-outline" size={50} />
+          </Card.Content>
+        </Card>
       </View>
     </ScrollView>
   );
 }
 
-const ToDoItem = ({ todoItem: { title, done }, id }) => {
-  const [doneState, setDone] = useState(done);
-  const database = getDatabase();
-
-  const onCheck = () => {
-    setDone(!doneState);
-    update(ref(database, '/todos'), {
-      [id]: {
-        title,
-        done: !doneState,
-      },
-    });
-  };
-  return (
-    <View style={styles.todoItem}>
-      <Checkbox
-        onPress={onCheck}
-        status={doneState ? 'checked' : 'unchecked'}
-      // value={doneState}
-      />
-      <Text style={[styles.todoText, { opacity: doneState ? 0.2 : 1 }]}>
-        {title}
-      </Text>
-    </View>
-  );
-};
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 12
+    paddingTop: 12,
   },
   contentContainerStyle: {
-    padding: 24
+    padding: 24,
   },
-  textInput: {
-    borderWidth: 1,
-    borderColor: '#afafaf',
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginVertical: 20,
-    fontSize: 20,
-  },
-  todoItem: {
-    flexDirection: 'row',
-    marginVertical: 10,
-    alignItems: 'center'
-  },
-  todoText: {
-    paddingHorizontal: 5,
-    fontSize: 16
-  },
+  card: {
+    height: ScreenHeight / 3,
+    paddingVertical: 12,
+  }
 });

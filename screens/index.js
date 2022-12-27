@@ -2,6 +2,9 @@ import { LoginScreen } from './LoginScreen';
 import { SignupScreen } from './SignupScreen';
 import { HomeScreen } from './HomeScreen';
 import { ForgotPasswordScreen } from './ForgotPasswordScreen';
-import { CreateRoomScreen } from './CreateRoomScreen';
+import { CreateScreen } from './CreateScreen';
+import { JoinScreen } from './JoinScreen';
+import { SettingsScreen } from './SettingsScreen';
+import { ActivityScreen } from './ActivityScreen';
 
-export { LoginScreen, SignupScreen, HomeScreen, ForgotPasswordScreen, CreateRoomScreen };
+export { LoginScreen, SignupScreen, HomeScreen, ForgotPasswordScreen, CreateScreen, JoinScreen, SettingsScreen, ActivityScreen };

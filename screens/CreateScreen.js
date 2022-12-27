@@ -10,7 +10,7 @@ import {
 } from 'react-native-paper';
 
 
-export const CreateRoomScreen = () => {
+export const CreateScreen = () => {
 
     const { user } = useContext(AuthenticatedUserContext);
 
