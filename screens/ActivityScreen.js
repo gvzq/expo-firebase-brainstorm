@@ -1,62 +1,85 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthenticatedUserContext } from '../providers';
-import {
-    StyleSheet,
-    View,
-    ScrollView
-} from 'react-native';
+import { StyleSheet, ScrollView } from 'react-native';
+import { View } from '../components';
 import {
     Text,
     Checkbox,
     TextInput,
     Button
 } from 'react-native-paper';
-import {
-    ref,
-    onValue,
-    push,
-    update,
-    remove,
-    getDatabase
-} from 'firebase/database';
 
-export const ActivityScreen = ({ navigation }) => {
+import { doc, arrayUnion, updateDoc, getDoc, getFirestore, serverTimestamp, deleteField } from "firebase/firestore";
 
-    const [todos, setTodos] = useState({});
-    const [presentTodo, setPresentTodo] = useState('');
-    const todosKeys = Object.keys(todos);
-    const database = getDatabase();
+export const ActivityScreen = ({ route, navigation }) => {
+
+    const [ideas, setIdeas] = useState([]);
+    const [presentIdea, setPresentIdea] = useState('');
+    let ideasKeys = Object.keys(ideas);
     const { user } = useContext(AuthenticatedUserContext);
+    const [owner, setOwner] = useState('');
+    const { roomId } = route.params;
+    const db = getFirestore();
+    const docRef = doc(db, "sessions", roomId);
 
     useEffect(() => {
-        return onValue(ref(database, '/todos'), querySnapShot => {
-            let data = querySnapShot.val() || {};
-            let todoItems = { ...data };
-            setTodos(todoItems);
-        });
+        return (async () => {
+            const docSnap = await getDoc(docRef);
+            const document = docSnap.data();
+            setOwner(document.owner === user.email);
+            console.log('is owner', owner.toString())
+            let docIdeas = document?.ideas ?? [];
+            docIdeas = docIdeas.filter(idea => idea.user === user.uid);
+            console.log('ideas', docIdeas)
+            setIdeas(docIdeas);
+            return document
+        })
     }, []);
 
-    function addNewTodo() {
-        push(ref(database, '/todos'), {
-            done: false,
-            title: presentTodo,
+    async function addNewIdea() {
+        console.log('addNewIdea', presentIdea);
+        const model = {
+            user: user.uid,
+            text: presentIdea,
+        }
+        await updateDoc(docRef, { ideas: arrayUnion({ ...model }) });
+        console.log('addNewIdea', [{ ...ideas, ...model }])
+        setIdeas([...ideas, { ...model }]);
+        setPresentIdea('');
+    }
+
+    async function clearTodos() {
+        //TODO clear only where user matches UID of logged in user
+        const data = await updateDoc(docRef, {
+            [`ideas.${user.uid}`]: deleteField()
         });
-        setPresentTodo('');
+        console.log('clearTodos', data)
     }
 
-    function clearTodos() {
-        remove(ref(database, '/todos'));
-    }
-
-    return <ScrollView>
+    return <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.contentContainerStyle}
+    >
         <View>
-            {todosKeys.length > 0 ? (
-                todosKeys.map(key => (
-                    <ToDoItem
-                        key={key}
-                        id={key}
-                        todoItem={todos[key]}
-                    />
+            {owner && <>
+                <Text>Admin</Text>
+                <Button mode='outlined'>
+                    Stop
+                </Button>
+            </>}
+        </View>
+
+        <View>
+            {ideas.length > 0 ? (
+                ideasKeys.map(key => (
+                    // <ToDoItem
+                    //     key={key}
+                    //     id={key}
+                    //     todoItem={todos[key]}
+                    // />
+                    <Text key={key}>
+                        {ideas[key].text}
+                    </Text>
                 ))
             ) : (
                 <Text>No todo item</Text>
@@ -64,19 +87,20 @@ export const ActivityScreen = ({ navigation }) => {
         </View>
 
         <TextInput
-            placeholder="New todo"
-            value={presentTodo}
+            placeholder="Enter idea here"
+            value={presentIdea}
             style={styles.textInput}
             onChangeText={text => {
-                setPresentTodo(text);
+                setPresentIdea(text);
             }}
-            onSubmitEditing={addNewTodo}
+            onSubmitEditing={addNewIdea}
         />
         <View>
             <View style={{ marginTop: 20 }}>
                 <Button mode="outlined"
-                    onPress={addNewTodo}
-                    disabled={presentTodo == ''}>
+                    onPress={addNewIdea}
+                    disabled={presentIdea == ''}
+                >
                     Add new todo
                 </Button>
             </View>

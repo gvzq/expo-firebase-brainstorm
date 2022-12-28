@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { AuthenticatedUserContext } from '../providers';
 import {
     StyleSheet,
@@ -7,12 +7,38 @@ import {
 } from 'react-native';
 import {
     Text,
+    TextInput,
+    Button,
+    HelperText
 } from 'react-native-paper';
+import { Formik } from 'formik';
+import { setDoc, getDoc, doc, getFirestore } from "firebase/firestore";
 
-
-export const CreateScreen = () => {
-
+export const CreateScreen = ({ navigation }) => {
+    const [errorState, setErrorState] = useState('');
     const { user } = useContext(AuthenticatedUserContext);
+    const db = getFirestore();
+
+    const handleSignup = async values => {
+        const { roomId } = values;
+        console.log(roomId)
+
+        const docRef = doc(db, "sessions", roomId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            console.log("RoomID taken.", docSnap.data());
+            setErrorState(`${roomId} is already taken.`)
+        } else {
+            // doc.data() will be undefined in this case
+            console.log("RoomID is valid.");
+            console.log(user.email);
+            setErrorState('')
+            //TODO uncomment this
+            await setDoc(docRef, { owner: user.email }, { merge: true });
+            navigation.navigate('Activity', { roomId });
+        }
+    };
 
     return (
         <ScrollView
@@ -20,9 +46,48 @@ export const CreateScreen = () => {
             contentContainerStyle={styles.contentContainerStyle}
         >
             <View>
-                <Text>
-                    Hi
-                </Text>
+                <Formik
+                    initialValues={{
+                        roomId: ''
+                    }}
+                    onSubmit={values => handleSignup(values)}
+                >
+                    {({
+                        values,
+                        errors,
+                        handleChange,
+                        handleBlur,
+                        handleSubmit,
+                        isSubmitting
+                    }) => (
+                        <>
+                            {/* 
+                            TEXT IMPUT EXAMPLE
+                            https://snack.expo.dev/@react-native-paper/react-native-paper-example_v5 */}
+                            <TextInput
+                                mode="outlined"
+                                label="Enter room name"
+                                theme={{ roundness: 0 }}
+                                onChangeText={handleChange('roomId')}
+                                onBlur={handleBlur('roomId')}
+                                value={values.roomId}
+                                error={errorState}
+                            />
+
+                            <HelperText type="error" padding="none" visible={!errors}>
+                                {errorState}
+                            </HelperText>
+                            {errorState !== '' ? (
+                                <Text>
+                                    {errorState}
+                                </Text>
+                            ) : null}
+                            <Button mode={'contained'} onPress={handleSubmit} disabled={isSubmitting}>
+                                Create
+                            </Button>
+                        </>
+                    )}
+                </Formik>
             </View>
         </ScrollView>
     );

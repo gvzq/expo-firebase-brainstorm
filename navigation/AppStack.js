@@ -50,10 +50,19 @@ export const AppStack = () => {
       <Tab.Screen name="HomeStack"
         component={HomeStackScreen}
         options={{
+          tabBarLabel: 'Home',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home-outline" size={size} color={color} />
           ),
         }} />
-      <Tab.Screen name="SettingsStack" component={SettingsStackScreen} />
+      <Tab.Screen
+        name="SettingsStack"
+        component={SettingsStackScreen}
+        options={{
+          tabBarLabel: 'Settings',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="settings-outline" size={size} color={color} />
+          ),
+        }} />
     </Tab.Navigator>);
 };
